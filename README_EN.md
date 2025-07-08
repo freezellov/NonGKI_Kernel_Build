@@ -157,18 +157,24 @@ Below is an introduction to the patches included in the Patches directory:
         - If there are instances where syscall wasn't updated in time, you can submit an issue or a pull request.
     - Reference: https://github.com/backslashxx/KernelSU/issues/5
     
-- **syscall_hook_patches_older.sh**
-    - Variable: HOOK_METHOD -> syscall AND HOOK_OLDER -> true
+- **syscall_hook_patches_early.sh**
+    - Variable: None
     - This is the original version of the syscall patch, intended for situations where you need syscall functionality but the latest version fails to execute.
     - Reference: https://github.com/backslashxx/KernelSU/issues/5
 
+- **syscall_hook_patches_older.sh**
+    - Variable: HOOK_METHOD -> syscall AND HOOK_OLDER -> true
+    - Used for the latest minimized manual patching (Syscall) feature implemented by backslashxx. Compatibility with older compilers isn't great. But it's been adapted to support devices with kernel versions ≤ 3.18 (ARMV7A), so it's compatible with all kernels. This will automatically execute for older kernel versions (kernel version ≤ 4.9) that lack SELinux-related permissions.
+        - Version 1.4
+    - Reference: https://github.com/backslashxx/KernelSU/issues/5
+    
 - **backport_patches.sh**
     - Executes automatically based on kernel version.
     - Used for backporting features to Non-GKI kernels. While KernelSU-Next and SukiSU-Ultra can automatically handle backporting, other branches cannot.
     - Reference: https://github.com/backslashxx/KernelSU/issues/4#issue-2818274642
     
-- **backport_patches_older.sh**
-    - Variable: HOOK_OLDER -> true
+- **backport_patches_early.sh**
+    - Automatic execution
     - This refers to the older backport solution, which is used for both the normal patch and the older version of the syscall patch.
     - Reference: https://github.com/backslashxx/KernelSU/issues/4#issue-2818274642
 
@@ -185,8 +191,26 @@ Below is an introduction to the patches included in the Patches directory:
 - **Patch/susfs_upgrade_to_157.patch**
     - Variable: (env file) SUSFS_UPDATE -> true
     - Updates SuSFS from v1.5.5 to v1.5.7 for Non-GKI devices that have stopped receiving updates.
-    - Reference: https://github.com/rsuntk/android_kernel_asus_sdm660-4.19/compare/c7d82bf8607704c22a8a869c4611c7cf3d22ce31..1ea2cbd7659167e62d2265632710f084c45f3ca1
+    - Reference: https://github.com/rsuntk/android_kernel_asus_sdm660-4.19/commit/b3c85f330b135baf5c101b07f027e69e75f42060
 
+- **Patch/susfs_upgrade_to_158_X_X.patch**
+    - Variable: (env file) SUSFS_UPDATE -> true
+    - Updates SuSFS from v1.5.7 to v1.5.8 for Non-GKI devices that have stopped receiving updates.
+    - References:
+        - https://github.com/rsuntk/android_kernel_asus_sdm660-4.19/commit/41678dd9290f04d98b9f0523574e11f98c7ce7c1
+        - https://github.com/rsuntk/android_kernel_asus_sdm660-4.19/commit/60008290523a235282176b328f390777282024c9
+        - https://github.com/rsuntk/android_kernel_asus_sdm660-4.19/commit/999ae11965ac2b4f3d3c7fbebc8e09cc8bbd0fce
+        
+- **Patch/susfs_upgrade_to_159.patch**
+    - Variable: (env file) SUSFS_UPDATE -> true
+    - Updates SuSFS from v1.5.8 to v1.5.9 for Non-GKI devices that have stopped receiving updates.
+    - References:
+        - https://gitlab.com/simonpunk/susfs4ksu/-/commit/fc90c9428b56133a99c39f0915472c0fc25979fe
+        - https://gitlab.com/simonpunk/susfs4ksu/-/commit/b9dca0f7498413f5f6e19e74b530a64d628ae315
+        - https://gitlab.com/simonpunk/susfs4ksu/-/commit/10f3cbdc26cad49094572e23bb62857e056a805c
+        - https://gitlab.com/simonpunk/susfs4ksu/-/commit/072a1b42bf323439c71c045a389f362f39caffe0
+        - https://gitlab.com/simonpunk/susfs4ksu/-/commit/a26ba8380e1d10b2169b8148967c4f5108c2a3f7
+    
 - **Patch/set_memory_to_49_and_low.patch**
     - Requires **manual** execution.
     - A patch file for backporting the set_memory function to devices with kernel versions ≤ 4.9. Due to a lack of extensive testing, it's considered a test patch only and should only be used when the KPM function of SukiSU-Ultra is required.
@@ -194,12 +218,17 @@ Below is an introduction to the patches included in the Patches directory:
 
 - **Patch/fix_kpm.patch**
     - Variable: KPM_FIX -> true
-    - Used to address compilation failures caused by the **"stack frame" overflow vulnerability**.
-    - Reference: [https://github.com/SukiSU-Ultra/SukiSU-Ultra/issues/141](https://github.com/SukiSU-Ultra/SukiSU-Ultra/issues/141)
+    - Used to address compilation failures caused by the **stack frame overflow vulnerability**.
+    - Reference: https://github.com/SukiSU-Ultra/SukiSU-Ultra/issues/141
     
 - **Rekernel/rekernel-X.X.patch**
     - Variable: REKERNEL_ENABLE -> true
     - A patch file to enable Re:Kernel support in the kernel. The YAML will automatically determine which patch to use based on your kernel version. However, if you have a 4.9 kernel and the current patch isn't working, you'll need to change the patch to rekernel-4.9-for-fixed.patch and try again. This does not support devices with kernel versions ≤ 4.4.
     - Reference: https://github.com/Sakion-Team/Re-Kernel/blob/main/Integrate/README_CN.md
+    
+- **Bin/curlx.sh**
+    - Automatic execution
+    - Used for more convenient execution of **curl** commands, including resuming interrupted downloads.
+    - Reference: Updated by [@yu13140](https://github.com/yu13140).
     
 Final Reminder⚠ : Unless otherwise mentioned, there is no need to modify any other sections of the .yml workflow. The setup is designed to automatically handle various conditions.
