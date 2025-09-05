@@ -8,7 +8,7 @@ env:
   KERNELSU_METHOD: "shell" # shell, manual and only.
   PATCHES_SOURCE: "author/source" # [your_name]/[your_patch] -> gooder123/NonGKI_Patcher
   PATCHES_BRANCH: "branch" # [your_branch] -> main
-  HOOK_METHOD: "normal" # manual hook method,can choice syscall and normal.
+  HOOK_METHOD: "normal" # manual hook method,can choice syscall ,normal and tracepoint.
   HOOK_OLDER: "false" # contain backport older patch and syscall older patch.
   PROFILE_NAME: "codename_rom_template.env" # your profile name.
   KERNELSU_SUS_PATCH: "false" # if u need manual susfs patch to kernelsu.
@@ -239,8 +239,10 @@ jobs:
           fi
 
           echo "CONFIG_KSU=y" >> ./arch/$ARCH/configs/${{ env.DEFCONFIG_NAME }}
-          if [[ "${{ env.KERNELSU_SOURCE }}" == *rsuntk* ]] || [[ "${{ env.KERNELSU_SOURCE }}" == *SukiSU* ]]; then
-            echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./arch/$ARCH/configs/${{ env.DEFCONFIG_NAME }}
+          if [[ "${{ env.KERNELSU_SOURCE }}" == *SukiSU* ]] && [[ "${{ env.HOOK_METHOD }}" == "tracepoint" ]]; then
+            echo "CONFIG_KSU_TRACEPOINT_HOOK=y" >> ./arch/arm64/configs/${{ env.DEFCONFIG_NAME }}
+          elif [[ "${{ env.KERNELSU_SOURCE }}" == *rsuntk* ]] || [[ "${{ env.KERNELSU_SOURCE }}" == *SukiSU* ]]; then
+            echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
           fi
           if [[ "${{ env.KERNELSU_SOURCE }}" == *SukiSU* ]] && [[ "${{ env.KPM_ENABLE }}" == "true" ]]; then
             echo "CONFIG_KALLSYMS=y" >> ./arch/$ARCH/configs/${{ env.DEFCONFIG_NAME }}
@@ -438,6 +440,23 @@ jobs:
                 else
                    echo "Cannot found syscall_hook_patches.sh in build project , please check u file existed in build project !"
                    false
+               fi
+            elif [[ ${{ env.HOOK_METHOD }} == "tracepoint" ]]; then
+               if [[ -f "/tmp/Patches/tracepoint_hook_patches.sh" ]]; then
+                  cp /tmp/Patches/tracepoint_hook_patches.sh device_kernel/
+                  cd device_kernel
+                  bash tracepoint_hook_patches.sh
+                  echo "execuated tracepoint patch successfully."
+                  if [[ "${{ env.KERNELSU_NAME }}" != "KernelSU-Next" ]]; then
+                        cp /tmp/Patches/backport_patches_early.sh ./
+                        bash backport_patches_early.sh
+                        echo "execuated backport patch early successfully. "
+                  else
+                      echo "your kernel needn't backport patch."
+                  fi
+               else
+                  echo "Cannot found tracepoint_hook_patches.sh in build project , please check u file existed in build project !"
+                  false
                fi
             else
               echo "please input vaild option!"
